@@ -1,90 +1,128 @@
-# Obsidian Sample Plugin
+# SOP Mission Control Sync for Obsidian
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+Obsidian community plugin that syncs structured notes from an Obsidian vault to Rafael's SOP Mission Control application.
 
-This project uses TypeScript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definition format, which contains TSDoc comments describing what it does.
+## Project status
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open modal (simple)" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
+This repository started from the official Obsidian sample plugin and is currently in the transition from scaffold to product.
 
-## First time developing plugins?
+The current codebase still contains sample behavior from the base template. The product definition and scope for the real plugin are now documented in `docs/`.
 
-Quick starting guide for new plugin devs:
+## Product intent
 
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+SOP Mission Control is Rafael's personal operating system for running two business fronts in one application:
 
-## Releasing new releases
+- `Executive`: Quest Edu operations, decisions, meetings, tasks, and weekly review.
+- `Creator`: content production and distribution for Rafael's personal brand.
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
+The plugin exists to make Obsidian a structured capture and reflection surface that can push relevant notes into Mission Control without forcing manual copy/paste.
 
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
+This plugin is intentionally scoped to synchronization only. It does not create notes, manage templates, or own the authoring workflow inside Obsidian.
 
-## Adding your plugin to the community plugin list
+## V1 scope
 
-- Check the [plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines).
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
+The first version is intentionally narrow:
 
-## How to use
+- sync only from `Obsidian -> SOP`
+- sync only notes explicitly marked for synchronization
+- support one note type first: `meeting`
+- include note domain metadata such as `executive` and `creator`
+- provide manual sync from the Obsidian UI
+- expose both a command and a ribbon icon for manual sync
+- provide plugin settings for API base URL, sync token, and basic sync options
+- send structured note payloads to the SOP API
+- write sync metadata back to the note frontmatter after successful sync
 
-- Clone this repo.
-- Make sure your NodeJS is at least v16 (`node --version`).
-- `npm i` or `yarn` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
+Out of scope for V1:
 
-## Manually installing the plugin
+- bidirectional sync
+- automatic background sync
+- support for multiple note types from day one
+- conflict resolution between local and remote edits
+- aggressive text inference from free-form notes
+- note creation or template management inside the plugin
 
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
+## Proposed note model for V1
 
-## Improve code quality with eslint
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code. 
-- This project already has eslint preconfigured, you can invoke a check by running`npm run lint`
-- Together with a custom eslint [plugin](https://github.com/obsidianmd/eslint-plugin) for Obsidan specific code guidelines.
-- A GitHub action is preconfigured to automatically lint every commit on all branches.
+Notes eligible for sync should use frontmatter markers such as:
 
-## Funding URL
-
-You can include funding URLs where people who use your plugin can financially support it.
-
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
-
-```json
-{
-    "fundingUrl": "https://buymeacoffee.com"
-}
+```yaml
+---
+sopSync: true
+sopType: meeting
+sopDomain: executive
+noteId: 20260312104530-a7k2
+---
 ```
 
-If you have multiple URLs, you can also do:
+The agreed direction for the meeting note model is:
 
-```json
-{
-    "fundingUrl": {
-        "Buy Me a Coffee": "https://buymeacoffee.com",
-        "GitHub Sponsor": "https://github.com/sponsors",
-        "Patreon": "https://www.patreon.com/"
-    }
-}
+- frontmatter for note identity and stable metadata
+- markdown as the primary content body sent to the SOP
+- optional section structure for human-friendly authoring, including objective, participants, decisions, and tasks
+- support section titles in either English or Portuguese
+- use `noteId` from frontmatter as the stable `externalId` sent to SOP
+
+The agreed direction for execution is:
+
+- send one note per request in V1
+- log sync failures locally in the plugin data area
+
+## Repository structure
+
+Current relevant files:
+
+- `src/main.ts`: current Obsidian plugin entrypoint from the sample template
+- `src/settings.ts`: current sample settings tab
+- `manifest.json`: plugin manifest, still using sample values
+- `docs/project-context.md`: business and product context
+- `docs/v1-scope.md`: agreed initial scope and architecture direction
+- `AGENTS.md`: working instructions plus persistent project context for future sessions
+
+## Development
+
+Install dependencies:
+
+```bash
+npm install
 ```
 
-## API Documentation
+Start watch mode:
 
-See https://docs.obsidian.md
+```bash
+npm run dev
+```
+
+Run a production build:
+
+```bash
+npm run build
+```
+
+Run lint:
+
+```bash
+npm run lint
+```
+
+## Manual testing in Obsidian
+
+Copy the release artifacts to:
+
+```bash
+<Vault>/.obsidian/plugins/<plugin-id>/
+```
+
+Required files:
+
+- `main.js`
+- `manifest.json`
+- `styles.css` if used
+
+Then reload Obsidian and enable the plugin in **Settings -> Community plugins**.
+
+## Documentation
+
+- [`docs/project-context.md`](docs/project-context.md)
+- [`docs/v1-scope.md`](docs/v1-scope.md)
+- [`docs/meeting-note-template.md`](docs/meeting-note-template.md)

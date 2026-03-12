@@ -1,5 +1,79 @@
 # Obsidian community plugin
 
+## Persistent project context
+
+- Repository purpose: build an Obsidian community plugin that synchronizes selected Obsidian notes with SOP Mission Control.
+- Current origin: this repository started from the official Obsidian sample plugin scaffold and is still transitioning away from sample code.
+- Product owner context: SOP Mission Control is Rafael's personal operating system for running two business fronts in a single application:
+  - `Executive`: Quest Edu operation, including decisions, meetings, tasks, and weekly review.
+  - `Creator`: content production and distribution for Rafael's personal brand.
+- Higher-level product goal: reduce context switching, preserve strategic memory, and maintain a clear weekly operating rhythm.
+- Existing SOP application scope: authentication, route protection, core entities, cockpit, dual inbox, weeks, weekly focus, decisions, meetings, tasks, weekly review, and navigation areas such as `/cockpit`, `/inbox`, `/executive`, `/creator`, `/week`, and `/settings`.
+
+## Plugin product intent
+
+- Obsidian should serve as a structured note-taking and reflection environment.
+- The plugin should identify notes marked for synchronization, parse their structured content, send them to the SOP API, and record sync metadata back into the notes.
+- The plugin should favor explicit, user-controlled synchronization over invisible automation.
+- The plugin is not responsible for note creation or template authoring. Those stay in the user's Obsidian workflow.
+
+## Agreed V1 scope
+
+- Sync direction for V1: `Obsidian -> SOP` only.
+- Trigger model for V1: manual sync initiated by the user from the Obsidian UI.
+- Initial supported note type: `meeting` only.
+- Eligibility marker: frontmatter-based explicit markers, with the current recommended convention:
+  ```yaml
+  ---
+  sopSync: true
+  sopType: meeting
+  sopDomain: executive
+  noteId: 20260312104530-a7k2
+  ---
+  ```
+- Additional note metadata for V1:
+  - `sopDomain` should distinguish at least `executive` and `creator`
+  - `noteId` should be the stable local identifier used as `externalId` in sync payloads
+- Required plugin settings for V1:
+  - SOP API base URL
+  - sync token
+  - optional sync folder restriction
+  - basic network settings such as timeout
+- Expected sync behavior:
+  - scan eligible notes
+  - extract required metadata from frontmatter
+  - send the main note body as markdown
+  - accept section titles in English or Portuguese
+  - send one note per request to the SOP API
+  - persist metadata such as `sopId`, `lastSyncedAt`, and `lastSyncStatus` back into the note after sync
+  - write sync failures to a local plugin log file
+  - show sync results inside Obsidian
+- Sync UI for V1:
+  - one command to trigger sync
+  - one ribbon icon that triggers the same sync flow
+
+## Explicitly out of scope for V1
+
+- Bidirectional sync
+- Automatic sync on interval
+- Automatic sync on opening or closing Obsidian
+- Support for multiple note types in the first release
+- Conflict resolution between local and remote state
+- Free-form AI-like parsing of arbitrary notes
+- Note creation
+- Template management inside the plugin
+
+## Delivery guidance for future work in this repo
+
+- Replace the sample-plugin behavior incrementally but decisively; do not preserve sample features unless they are repurposed for the real product.
+- Keep `src/main.ts` minimal and move product logic into focused modules.
+- Prefer frontmatter plus well-defined markdown sections over implicit parsing heuristics.
+- Do not use note path as the primary sync identity; use `noteId` persisted in frontmatter.
+- Prefer one-note-per-request orchestration in V1 for simpler retries, observability, and idempotency.
+- Prefer sending note content as markdown plus minimal metadata instead of over-modeling note sections in the first version.
+- Preserve human-in-the-loop behavior as a product principle.
+- Keep README and `docs/` aligned with the latest agreed scope whenever scope changes materially.
+
 ## Project overview
 
 - Target: Obsidian Community Plugin (TypeScript → bundled JavaScript).
