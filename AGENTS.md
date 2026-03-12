@@ -15,6 +15,7 @@
 - Obsidian should serve as a structured note-taking and reflection environment.
 - The plugin should identify notes marked for synchronization, parse their structured content, send them to the SOP API, and record sync metadata back into the notes.
 - The plugin should favor explicit, user-controlled synchronization over invisible automation.
+- The plugin is not responsible for note creation or template authoring. Those stay in the user's Obsidian workflow.
 
 ## Agreed V1 scope
 
@@ -26,8 +27,13 @@
   ---
   sopSync: true
   sopType: meeting
+  sopDomain: executive
+  noteId: 20260312104530-a7k2
   ---
   ```
+- Additional note metadata for V1:
+  - `sopDomain` should distinguish at least `executive` and `creator`
+  - `noteId` should be the stable local identifier used as `externalId` in sync payloads
 - Required plugin settings for V1:
   - SOP API base URL
   - sync token
@@ -35,10 +41,16 @@
   - basic network settings such as timeout
 - Expected sync behavior:
   - scan eligible notes
-  - extract structured meeting data from frontmatter plus markdown sections
-  - send payloads to the SOP API
+  - extract required metadata from frontmatter
+  - send the main note body as markdown
+  - accept section titles in English or Portuguese
+  - send one note per request to the SOP API
   - persist metadata such as `sopId`, `lastSyncedAt`, and `lastSyncStatus` back into the note after sync
+  - write sync failures to a local plugin log file
   - show sync results inside Obsidian
+- Sync UI for V1:
+  - one command to trigger sync
+  - one ribbon icon that triggers the same sync flow
 
 ## Explicitly out of scope for V1
 
@@ -48,12 +60,17 @@
 - Support for multiple note types in the first release
 - Conflict resolution between local and remote state
 - Free-form AI-like parsing of arbitrary notes
+- Note creation
+- Template management inside the plugin
 
 ## Delivery guidance for future work in this repo
 
 - Replace the sample-plugin behavior incrementally but decisively; do not preserve sample features unless they are repurposed for the real product.
 - Keep `src/main.ts` minimal and move product logic into focused modules.
 - Prefer frontmatter plus well-defined markdown sections over implicit parsing heuristics.
+- Do not use note path as the primary sync identity; use `noteId` persisted in frontmatter.
+- Prefer one-note-per-request orchestration in V1 for simpler retries, observability, and idempotency.
+- Prefer sending note content as markdown plus minimal metadata instead of over-modeling note sections in the first version.
 - Preserve human-in-the-loop behavior as a product principle.
 - Keep README and `docs/` aligned with the latest agreed scope whenever scope changes materially.
 

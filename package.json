@@ -1,7 +1,7 @@
 {
-	"name": "obsidian-sample-plugin",
+	"name": "sync-obsidian-notes-with-sop",
 	"version": "1.0.0",
-	"description": "This is a sample plugin for Obsidian (https://obsidian.md)",
+	"description": "Obsidian plugin for synchronizing notes with SOP Mission Control.",
 	"main": "main.js",
 	"type": "module",
 	"scripts": {

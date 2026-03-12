@@ -17,6 +17,8 @@ SOP Mission Control is Rafael's personal operating system for running two busine
 
 The plugin exists to make Obsidian a structured capture and reflection surface that can push relevant notes into Mission Control without forcing manual copy/paste.
 
+This plugin is intentionally scoped to synchronization only. It does not create notes, manage templates, or own the authoring workflow inside Obsidian.
+
 ## V1 scope
 
 The first version is intentionally narrow:
@@ -24,7 +26,9 @@ The first version is intentionally narrow:
 - sync only from `Obsidian -> SOP`
 - sync only notes explicitly marked for synchronization
 - support one note type first: `meeting`
+- include note domain metadata such as `executive` and `creator`
 - provide manual sync from the Obsidian UI
+- expose both a command and a ribbon icon for manual sync
 - provide plugin settings for API base URL, sync token, and basic sync options
 - send structured note payloads to the SOP API
 - write sync metadata back to the note frontmatter after successful sync
@@ -36,6 +40,7 @@ Out of scope for V1:
 - support for multiple note types from day one
 - conflict resolution between local and remote edits
 - aggressive text inference from free-form notes
+- note creation or template management inside the plugin
 
 ## Proposed note model for V1
 
@@ -45,13 +50,23 @@ Notes eligible for sync should use frontmatter markers such as:
 ---
 sopSync: true
 sopType: meeting
+sopDomain: executive
+noteId: 20260312104530-a7k2
 ---
 ```
 
-The exact meeting schema is still being finalized, but the agreed direction is:
+The agreed direction for the meeting note model is:
 
 - frontmatter for note identity and stable metadata
-- markdown sections for human-friendly content like objective, participants, decisions, and tasks
+- markdown as the primary content body sent to the SOP
+- optional section structure for human-friendly authoring, including objective, participants, decisions, and tasks
+- support section titles in either English or Portuguese
+- use `noteId` from frontmatter as the stable `externalId` sent to SOP
+
+The agreed direction for execution is:
+
+- send one note per request in V1
+- log sync failures locally in the plugin data area
 
 ## Repository structure
 
@@ -110,3 +125,4 @@ Then reload Obsidian and enable the plugin in **Settings -> Community plugins**.
 
 - [`docs/project-context.md`](docs/project-context.md)
 - [`docs/v1-scope.md`](docs/v1-scope.md)
+- [`docs/meeting-note-template.md`](docs/meeting-note-template.md)
