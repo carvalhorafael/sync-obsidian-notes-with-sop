@@ -60,6 +60,13 @@ export interface EligibleMeetingNote {
 export interface SyncOutcome {
 	filePath: string;
 	ok: boolean;
+	kind: "success" | "failed" | "skipped";
 	reason?: string;
 	created?: boolean;
+}
+
+export interface EligibleMeetingNotesResult {
+	scannedCount: number;
+	notes: EligibleMeetingNote[];
+	skipped: Array<{ filePath: string; reason: string }>;
 }

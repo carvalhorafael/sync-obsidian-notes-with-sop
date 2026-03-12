@@ -10,9 +10,17 @@ export class SyncLogger {
 		this.logFilePath = `${this.app.vault.configDir}/plugins/${manifest.id}/sync.log`;
 	}
 
+	async logInfo(message: string): Promise<void> {
+		await this.writeEntry("INFO", message);
+	}
+
 	async logError(message: string): Promise<void> {
+		await this.writeEntry("ERROR", message);
+	}
+
+	private async writeEntry(level: "INFO" | "ERROR", message: string): Promise<void> {
 		const adapter = this.app.vault.adapter;
-		const entry = `[${new Date().toISOString()}] ${message}\n`;
+		const entry = `[${new Date().toISOString()}] [${level}] ${message}\n`;
 
 		try {
 			const existing = await adapter.read(this.logFilePath).catch(() => "");

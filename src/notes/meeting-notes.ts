@@ -1,6 +1,7 @@
 import { TFile, type App } from "obsidian";
 import type {
 	EligibleMeetingNote,
+	EligibleMeetingNotesResult,
 	NoteFrontmatter,
 	SopDomain,
 } from "../types";
@@ -8,7 +9,7 @@ import type {
 export async function getEligibleMeetingNotes(
 	app: App,
 	syncFolder: string,
-): Promise<{ notes: EligibleMeetingNote[]; skipped: Array<{ filePath: string; reason: string }> }> {
+): Promise<EligibleMeetingNotesResult> {
 	const markdownFiles = app.vault.getMarkdownFiles().filter((file) =>
 		shouldConsiderFile(file, syncFolder),
 	);
@@ -55,13 +56,17 @@ export async function getEligibleMeetingNotes(
 			title: file.basename,
 			domain: frontmatter.sopDomain,
 			noteId,
-			sopId: frontmatter.sopId,
+			sopId: normalizeOptionalString(frontmatter.sopId),
 			meetingDate: frontmatter.meetingDate,
 			markdown,
 		});
 	}
 
-	return { notes, skipped };
+	return {
+		scannedCount: markdownFiles.length,
+		notes,
+		skipped,
+	};
 }
 
 export async function updateSyncMetadata(
@@ -129,6 +134,11 @@ function isIsoDate(value: string): boolean {
 
 function stripFrontmatter(content: string): string {
 	return content.replace(/^---\n[\s\S]*?\n---\n?/, "");
+}
+
+function normalizeOptionalString(value: string | undefined): string | undefined {
+	const normalized = value?.trim();
+	return normalized ? normalized : undefined;
 }
 
 async function persistNoteId(app: App, file: TFile, noteId: string): Promise<void> {
