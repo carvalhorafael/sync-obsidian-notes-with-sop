@@ -1,5 +1,62 @@
 # Obsidian community plugin
 
+## Persistent project context
+
+- Repository purpose: build an Obsidian community plugin that synchronizes selected Obsidian notes with SOP Mission Control.
+- Current origin: this repository started from the official Obsidian sample plugin scaffold and is still transitioning away from sample code.
+- Product owner context: SOP Mission Control is Rafael's personal operating system for running two business fronts in a single application:
+  - `Executive`: Quest Edu operation, including decisions, meetings, tasks, and weekly review.
+  - `Creator`: content production and distribution for Rafael's personal brand.
+- Higher-level product goal: reduce context switching, preserve strategic memory, and maintain a clear weekly operating rhythm.
+- Existing SOP application scope: authentication, route protection, core entities, cockpit, dual inbox, weeks, weekly focus, decisions, meetings, tasks, weekly review, and navigation areas such as `/cockpit`, `/inbox`, `/executive`, `/creator`, `/week`, and `/settings`.
+
+## Plugin product intent
+
+- Obsidian should serve as a structured note-taking and reflection environment.
+- The plugin should identify notes marked for synchronization, parse their structured content, send them to the SOP API, and record sync metadata back into the notes.
+- The plugin should favor explicit, user-controlled synchronization over invisible automation.
+
+## Agreed V1 scope
+
+- Sync direction for V1: `Obsidian -> SOP` only.
+- Trigger model for V1: manual sync initiated by the user from the Obsidian UI.
+- Initial supported note type: `meeting` only.
+- Eligibility marker: frontmatter-based explicit markers, with the current recommended convention:
+  ```yaml
+  ---
+  sopSync: true
+  sopType: meeting
+  ---
+  ```
+- Required plugin settings for V1:
+  - SOP API base URL
+  - sync token
+  - optional sync folder restriction
+  - basic network settings such as timeout
+- Expected sync behavior:
+  - scan eligible notes
+  - extract structured meeting data from frontmatter plus markdown sections
+  - send payloads to the SOP API
+  - persist metadata such as `sopId`, `lastSyncedAt`, and `lastSyncStatus` back into the note after sync
+  - show sync results inside Obsidian
+
+## Explicitly out of scope for V1
+
+- Bidirectional sync
+- Automatic sync on interval
+- Automatic sync on opening or closing Obsidian
+- Support for multiple note types in the first release
+- Conflict resolution between local and remote state
+- Free-form AI-like parsing of arbitrary notes
+
+## Delivery guidance for future work in this repo
+
+- Replace the sample-plugin behavior incrementally but decisively; do not preserve sample features unless they are repurposed for the real product.
+- Keep `src/main.ts` minimal and move product logic into focused modules.
+- Prefer frontmatter plus well-defined markdown sections over implicit parsing heuristics.
+- Preserve human-in-the-loop behavior as a product principle.
+- Keep README and `docs/` aligned with the latest agreed scope whenever scope changes materially.
+
 ## Project overview
 
 - Target: Obsidian Community Plugin (TypeScript → bundled JavaScript).
